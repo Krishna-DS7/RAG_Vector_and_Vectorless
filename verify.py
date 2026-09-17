@@ -801,6 +801,30 @@ def _():
 
 
 # ---- sample-only: exact expected values ------------------------------------
+@check("headings survive a page with no blank lines")
+def _():
+    # pypdf routinely returns a page as one unbroken run of lines. Testing only
+    # the first line of each block then keeps one heading per page and swallows
+    # every later one into the body, where nothing downstream can see it.
+    from shared.text_ops import unwrap_paragraphs
+    from shared.headings import match_decimal
+
+    page = ("1  Scope\n"
+            "This standard applies to every system.\n"
+            "1.1  Definitions\n"
+            "A record is any document holding a name.\n"
+            "2  Retention of Records\n"
+            "Records are kept for seven years.")
+    blocks = unwrap_paragraphs(page, match_decimal).split("\n\n")
+    headings = [b for b in blocks if match_decimal(b)]
+    assert len(headings) == 3, \
+        f"{len(headings)} of 3 headings survived a page with no blank lines"
+    for heading in headings:
+        assert "\n" not in heading and len(heading) < 40, \
+            f"heading merged into body text: {heading[:60]!r}"
+    return "3 of 3 headings kept, each on its own line"
+
+
 @check("ambiguous hyphen kept, ordinary ones joined", sample_only=True)
 def _():
     assert "one-time" in TEXT and "onetime" not in TEXT
