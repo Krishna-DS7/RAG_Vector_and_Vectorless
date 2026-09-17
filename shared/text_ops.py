@@ -162,6 +162,14 @@ def join_hyphenated_linebreaks(text: str, report: Optional[List] = None) -> str:
 #
 #  Blank lines separate blocks; inside a block, join with a space. Headings
 #  stay on their own line so structure survives for the tree builder.
+#
+#  EVERY line is tested, not just the first of each block. Blank lines are a
+#  convention of the writer, not of the format: pypdf routinely returns a whole
+#  page as one unbroken run of lines, and a real extractor is under no
+#  obligation to mark where a paragraph ended. Testing only the first line of a
+#  block means that on such a page exactly one heading survives and every
+#  later one is swallowed mid-paragraph -- where the tree builder cannot see
+#  it, structural chunking cannot cut on it, and nothing reports it missing.
 
 def unwrap_paragraphs(text: str, is_heading=None) -> str:
     """
@@ -174,14 +182,17 @@ def unwrap_paragraphs(text: str, is_heading=None) -> str:
     blocks = []
     for block in re.split(r"\n\s*\n", text):
         lines = [l.strip() for l in block.split("\n") if l.strip()]
-        if not lines:
-            continue
-        if is_heading(lines[0]):
-            blocks.append(lines[0])
-            if lines[1:]:
-                blocks.append(" ".join(lines[1:]))
-        else:
-            blocks.append(" ".join(lines))
+        body = []
+        for line in lines:
+            if is_heading(line):
+                if body:
+                    blocks.append(" ".join(body))
+                    body = []
+                blocks.append(line)
+            else:
+                body.append(line)
+        if body:
+            blocks.append(" ".join(body))
     return "\n\n".join(blocks)
 
 
