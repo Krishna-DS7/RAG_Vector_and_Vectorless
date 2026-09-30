@@ -26,6 +26,31 @@ workbook shows you why each step is there, with the arithmetic visible rather
 than executed. It is also the specification this code is written against —
 where the two ever disagree, the workbook is right.
 
+## A second workbook: retrieving the table of contents
+
+`STAIR_Course_ToC_Retrieval.xlsx` covers one paper in the same style:
+*STAIR (STructure Aware Information Retriever)*, arXiv 2609.03874. STAIR
+fine-tunes an LLM to answer a query by generating the title of the right
+table-of-contents leaf, with the whole ToC in its input. The paper evaluates
+it on SearchTome, a benchmark of 18 textbooks.
+
+It has 23 sheets. On the handbook from the first workbook, you can:
+
+- watch STAIR's exact prompt being built for any query;
+- see constrained decoding restrict the output to valid leaves;
+- compute Recall@1, Recall@3 and nDCG@3;
+- run a paired randomization test.
+
+Using the paper's own data, it also:
+
+- reproduces Table 1 and Table 4 as live tables;
+- checks whether the paper's numbers agree with each other (most do; the
+  §6.2 error rates do not);
+- works out whether each book's ToC fits in the 14k-token input, and what
+  training costs compared with DSI.
+
+Every fact is tagged: PAPER (with a page number), TOY or ANALYSIS.
+
 ## Install
 
 Python 3.8+. For PDFs, one extractor:
